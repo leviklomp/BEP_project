@@ -3,6 +3,7 @@ using Statistics
 using Distributions
 using Plots
 using LinearAlgebra
+using JLD
 include("SimulateRF.jl")
 include("MetropolisHastings.jl")
 include("CreateSystem.jl")
@@ -13,13 +14,13 @@ function posteriorexample2d(ρ,Y,xas,yas) #Example
     Nx = length(xas)
     Ny = length(yas)
     N = Nx*Ny
-    #ρ = [μ;A;B;C;σ^2] parameters
-    R = ρ[1:N]
+    #ρ = [μ;A;B;C;ν2] parameters
+    R = ρ[1:N] 
     η = ρ[N+1:N+3]
     ν2 = ρ[end]
 
     #creating covariance matrix using a kernel
-    kernelexample2d(t_n,t_m) = η[1]*cos(η[2]*norm(t_n-t_m))*exp(-η[3]*norm(t_n-t_m))
+    kernelexample2d(t_n,t_m) = ξ_X(t_n,t_m,η)
     Σ_η = CreateKernelMatrix2D(kernelexample2d,xas,yas)
 
     #likelihood
@@ -38,11 +39,11 @@ function posteriorexample2d(ρ,Y,xas,yas) #Example
 end
 
 ##Gaussian covariance function
-function ρ_X(t1,t2,η)
+function ξ_X(t1,t2,η)
 
     return η[1]*cos(η[2]*norm(t1-t2))*exp(-η[3]*norm(t1-t2))
 end
-function ρ_Xτ(τ,η)
+function ξ_Xτ(τ,η)
 
 
     return η[1]*cos(η[2]*norm(τ))*exp(-η[3]*norm(τ))
@@ -62,20 +63,21 @@ N = Nx*Ny
 d = N+4 #number of parameters [μ,A,B,C,σ]
 η = [1;1;0.5]
 
-ρX(t1,t2) = ρ_X(t1,t2,η)
+ξX(t1,t2) = ξ_X(t1,t2,η)
 
-R = SimGaussian2D(L,M,dx,dy,ρX)
+R = SimGaussian2D(L,M,dx,dy,ξX)
 ϵ = rand(Normal(0,σ),Ny,Nx)
 
 SampleData_mat = R + ϵ
 Plots.heatmap(xas,yas,R,title="Simulated RF",xlabel="x",ylabel="y",color = cgrad(:rainbow))
 Plots.heatmap(xas,yas,SampleData_mat,title="Simulated observed data",xlabel="x",ylabel="y",color = cgrad(:rainbow))
 SampleData = MatrixToVector(SampleData_mat)
+        
 ##Defininng posterior, and transition (ν is important for searching ρ)
 β = 0.02
 p(ρ) = posteriorexample2d(ρ,SampleData,xas,yas)
 q(ρ1,ρ2) = logMvNormalpdf(ρ1,β*Matrix(I,d,d),ρ2)
-q(ρ1,ρ2) = 1 #transition_density is symmetric
+q(ρ1,ρ2) = 1 #transition_density is symmetric so use simple form to reduce calculations
 Q(ρ) = ρ+rand(Normal(0,β),d,1) #transition sample
 ##Initial values
 x0 = [SampleData;1;1;1;.75]

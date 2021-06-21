@@ -28,7 +28,7 @@ function posteriorexample2d(ρ,Y,xas,yas) #Example
     log_likelihood = MvNormalpdf(zeros(N),ν2*Matrix(I,N,N),Y-R)+MvNormalpdf(zeros(N),Σ_η,R)
 
     v_η = 0.25*[1;1;1]
-    η_tilde = [1;1;0.1]
+    η_tilde = [1;1;0.5]
     μ_ν2 = 1
     σ_ν2 = 0.1
 

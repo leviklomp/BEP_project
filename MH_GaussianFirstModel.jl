@@ -77,7 +77,7 @@ SampleData = MatrixToVector(SampleData_mat)
 ##Defininng posterior, and transition (ν is important for searching ρ)
 β = 0.02
 p(ρ) = posteriorexample2d(ρ,SampleData,xas,yas)
-q(ρ1,ρ2) = logMvNormalpdf(ρ1,β*Matrix(I,d,d),ρ2)
+q(ρ1,ρ2) = MvNormalpdf(ρ1,β*Matrix(I,d,d),ρ2)
 q(ρ1,ρ2) = 1 #transition_density is symmetric so use simple form to reduce calculations
 Q(ρ) = ρ+rand(Normal(0,β),d,1) #transition sample
 ##Initial values

@@ -8,8 +8,8 @@ using JLD
 using ForwardDiff
 include("SimulateRF.jl")
 include("MetropolisHastings.jl")
-include("CreateSystem.jl")
-
+include("CreateCovarianceMatrices.jl")
+include("AuxiliaryFunctions.jl")
 ##
 function logdetJacobian_g(θ,R)
     f(x) = inv_mapping_g(θ,x)

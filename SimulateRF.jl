@@ -3,7 +3,7 @@ using Statistics
 using Distributions
 using StatsBase
 using LinearAlgebra
-include("CreateCovarianceMatrix.jl")
+include("CreateCovarianceMatrices.jl")
 
 function SimGaussian1D(L,dx,ρ_X)
     """Generates a 1D random standard Gaussian field with covariance function ξ

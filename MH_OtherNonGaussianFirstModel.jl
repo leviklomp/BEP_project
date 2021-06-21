@@ -22,7 +22,7 @@ function posteriorexample2d(ρ,Y,xas,yas) #Example
     v = ρ[N+4]
     ν2 = ρ[end]
     #creating covariance matrix using a kernel
-    kernelexample2d(t_n,t_m) = η[1]*cos(η[2]*norm(t_n-t_m))*exp(-η[3]*norm(t_n-t_m))
+    kernelexample2d(t_n,t_m) = ξ_X(t_n,t_m,η)
     Σ_η = CreateKernelMatrix2D(kernelexample2d,xas,yas)
     #calculating posterior ∝ scalar
 
@@ -37,11 +37,9 @@ function posteriorexample2d(ρ,Y,xas,yas) #Example
     σ_v = 0.25
 
     log_prior_η =  MvNormalpdf(η_tilde,v_η.*Matrix(I,length(η),length(η)),η)
-    #log_prior_η = log(pdf(Normal(η_tilde[1],v_η[1]),η[1]))+log(pdf(Normal(η_tilde[2],v_η[2]),η[2]))+log(pdf(Gamma(.5,η_tilde[3]),η[3]))
-    #log_prior_η = log(prod(pdf.(Gamma.(.5,η_tilde),η)))
     log_prior_v = log(pdf(Normal(μ_v,σ_v),v))
     log_prior_ν2 = log(pdf(Normal(μ_ν2,σ_ν2),ν2))
-    #log_prior_ν2 = log(pdf(Exponential(λ_ν2),ν2))
+    
 
     return log_likelihood+log_prior_η+log_prior_v+log_prior_ν2
 end

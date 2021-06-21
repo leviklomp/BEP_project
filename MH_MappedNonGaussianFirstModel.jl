@@ -38,11 +38,13 @@ function posteriorexample2d(ρ,Y,xas,yas) #Example
     η = ρ[N+1:N+3]
     θ = ρ[N+4:N+5]
     ν2 = ρ[end]
+    
     #creating covariance matrix using a kernel
-    kernelexample2d(t_n,t_m) = ρ_X(t_n,t_m,η)
+    kernelexample2d(t_n,t_m) = ξ_X(t_n,t_m,η)
     Σ_η = CreateKernelMatrix2D(kernelexample2d,xas,yas)
+    
     #calculating posterior ∝ scalar
-    if minimum(R)<=0
+    if minimum(R)<=0 #to prevent domain errors when running the MH algo
         log_likelihood = -Inf
     else
         log_likelihood = MvNormalpdf(zeros(N),ν2*Matrix(I,N,N),Y-R)+MvNormalpdf(zeros(N),Σ_η,inv_mapping_g(θ,R))+logdetJacobian_g(θ,R)
@@ -63,11 +65,11 @@ function posteriorexample2d(ρ,Y,xas,yas) #Example
 end
 
 ##Data we research
-function ρ_X(t1,t2,η) #Correlation function (in interval [-1,1])
+function ξ_X(t1,t2,η) #Correlation function (in interval [-1,1])
 
     return η[1]*cos(η[2]*norm(t1-t2))*exp(-η[3]*norm(t1-t2))
 end
-function ρ_Xτ(τ,η) #Correlation function (in interval [-1,1])
+function ξ_Xτ(τ,η) #Correlation function (in interval [-1,1])
 
 
     return η[1]*cos(η[2]*norm(τ))*exp(-η[3]*norm(τ))

@@ -3,22 +3,7 @@ using Statistics
 using Distributions
 using StatsBase
 using LinearAlgebra
-include("CreateKernelMatrix.jl")
-
-
-
-function MvNormalSample(μ,Σ)
-    """Sample from a MV normal distribution"""
-    n = length(μ)
-    F = eigen(Σ)
-    U = F.vectors
-    Λ = Diagonal(F.values)
-    sqrtΛ = Diagonal(sqrt.(Complex.(F.values)))
-    A = U*sqrtΛ
-    z = rand(Normal(),n,1)
-    x = real(μ + A*z)
-    return x
-end
+include("CreateCovarianceMatrix.jl")
 
 function SimGaussian1D(L,dx,ρ_X)
     """Generates a 1D random standard Gaussian field with covariance function ξ

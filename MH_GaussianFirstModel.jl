@@ -6,7 +6,8 @@ using LinearAlgebra
 using JLD
 include("SimulateRF.jl")
 include("MetropolisHastings.jl")
-include("CreateSystem.jl")
+include("CreateCovarianceMatrices.jl")
+include("AuxiliaryFunctions.jl")
 
 ##Posterior calculation for a given kernel density k
 function posteriorexample2d(ρ,Y,xas,yas) #Example

@@ -139,6 +139,7 @@ p2 = Plots.heatmap(xas,yas,Y,fill=true,fillcolor = cgrad(:rainbow),title="RF wit
 p3 = plot(p1,p2,size = (1200,600))
 savefig(p3,"EFRFlognormalfigures.png")
 ##creating mask
+            #=
 LL = (-.1,.1)
 UR = (.1,.1)
 # additional mask
@@ -149,9 +150,10 @@ NMy = length(maskyas)
 maskval = ones(NMy,NMx)
 Plots.heatmap!(maskxas,maskyas,maskval,color = "black")
 (Mask,Coordset) = CreateRectangularMask2D(xas,yas,LL,UR)
-Ynew = Mask*MatrixToVector(Y)
-Coordset
 
+Coordset
+=#
+Ynew = Mask*MatrixToVector(Y)
 n_guess = 5
 E_guess = GridEigenFunctionMatrix2D(xas,yas,eigenf,n_guess)
 θ_0 = [-.5;1]
@@ -164,6 +166,7 @@ d = length(ρ_0)
 q(θ1,θ2) = 1 #transition prob
 Q(θ) = θ+rand(Normal(0,β),d,1) #transition sample
 log_posterior_MH(ρ) = log_posterior(Ynew,ρ[end],ρ[1:n_guess^2],ρ[n_guess^2+1:n_guess^2+length(γ_0)],ρ[end-2:end-1],Mask,E_guess,n_guess,F)
+            
 ##running the algorithm
 steps = 25000
 burnin = 500
@@ -199,7 +202,7 @@ for i = 1:n_guess
 end
 
 
-R_hat = Fourier_RF_2D(B_hat,xas,yas,L,M)
+R_hat = Fourier_RF_2D(B_hat,xas,yas,L,M) 
 p1 = Plots.heatmap(xas,yas,R_hat,title = "Estimated RF",color = cgrad(:rainbow));
 p2 = Plots.heatmap(xas,yas,R_real,title = "Real RF",color = cgrad(:rainbow));
 p3 = plot(p1,p2,size=(600,300))
@@ -230,18 +233,4 @@ pν2 = Plots.plot(collect(burnin:1:steps+1),[MH_data_T[:,end] ones(N_MH)*ν2_rea
 p_params = plot(pb,pγ,pμ,pσ,pν2)
 savefig(p_params,"EFMHMappedNonGaussianSeperatedTrace.png")
 
-corrplot(MH_data_T[:,n_guess^2+1:end],label = append!(["gam$i" for i = 1:n_guess],["v2"]),fillcolor=cgrad(),title = "Matrix Scatterplot for
-γ and ν")
-cor(MH_data_T)
-cor(MH_data_T[:,n_guess^2+1:end])
 
-
-
-
-
-marginalhist(MH_data_T[:,1],MH_data_T[:,2])
-density(MatrixToVector(R_hat))
-density!(MatrixToVector(R_real))
-
-density(MH_data_T[:,n_guess^2+1:end])
-cdensity(MH_data_T[:,n_guess^2+1:end])

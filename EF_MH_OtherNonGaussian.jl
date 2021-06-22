@@ -62,10 +62,10 @@ yas = collect(-M:dy:M)
 Nx  = length(xas)
 Ny  = length(yas)
 N = Nx*Ny
-LL = (-.9,-.9)
-UR = (.5,.5)
+#LL = (-.9,-.9)
+#UR = (.5,.5)
 
-(Mask,Coordset) = CreateRectangularMask2D(xas,yas,LL,UR)
+#(Mask,Coordset) = CreateRectangularMask2D(xas,yas,LL,UR)
 
 #if we dont want to use mask take Mask = Identity matrix
 Mask = Matrix(I,N,N)
@@ -82,14 +82,14 @@ E_real = GridEigenFunctionMatrix2D(xas,yas,eigenf,n_real)
 ##function for covmat of the coefficients
 γ_real = [1/(l*m) for l = 1:n_real, m = 1:n_real]
 
-function F(l,m,l2,m2,γ)
+function F(l,m,l2,m2,γ) 
     return (l==l2)*(m==m2)*γ[l,m]#γ[1]*cos(γ[2]*abs(l-l2))+exp(-γ[3]*abs(m-m2))
 end
 F_γ(l,m,l2,m2) = F(l,m,l2,m2,γ_real)
 
 C_γ = CovarianceMatrixCoefficients2D(n_real,F_γ)
 #a = rand(MvNormal(zeros(n^2),C_γ))
-v_real = 10
+v_real = 10 #real degrees of freedom
 a_real = MvNormalSample(zeros(n_real^2),C_γ)
 b_real = a_real/(sqrt(rand(Chisq(v_real))/v_real))
 ##generating data
@@ -108,7 +108,9 @@ p1 = Plots.heatmap(xas,yas,R_real,fill=true,fillcolor = cgrad(:rainbow),title="E
 p2 = Plots.heatmap(xas,yas,Y,fill=true,fillcolor = cgrad(:rainbow),title="Eigenfunction representation of a 2D random field (with noise) \n with Gaussian coefficients",xlabel = "x",ylabel="y",aspect_ratio=:equal,grid = false,titlefont = font(8))
 p3 = plot(p1,p2)
 savefig(p3,"EFMHOtherNonGaussian2figures.png")
+            
 ## additional mask
+#=            
 maskxas = collect(LL[1]:dx:UR[1])
 NMx = length(maskxas)
 maskyas = collect(LL[2]:dy:UR[2])
@@ -118,9 +120,10 @@ Plots.heatmap!(maskxas,maskyas,maskval,color = "black")
 
 Ynew = Mask*MatrixToVector(Y)
 Coordset
-
+=#
+            
 n_guess = 5
-E_guess = GridEigenFunctionMatrix2D(xas,yas,eigenf,n_guess)
+E_guess = GridEigenFunctionMatrix2D(xas,yas,eigenf,n_guess) 
 γ_0 = ones(n_guess,n_guess)
 γ_0 = MatrixToVector(γ_0)
 ρ_0 = [zeros(n_guess^2);γ_0;10;1]
@@ -192,46 +195,4 @@ p_params = plot(pb,pγ,pv,pν2)
 savefig(p_params,"EFMHOtherNonGaussianSeperatedTraceplot.png")
 
 
-marginalhist(MH_data_T[1000:end,1],MH_data_T[1000:end,2])
 
-##creating several masks and comparing the variances
-#function TestMasksMH(log_posterior_MH,ρ_0,q,Q,steps,burnin,xas,yas,Ynew,E_guess,n_guess,F,num_masks,mask_step)
-ρ_0 = [zeros(n_guess^2);ones(n_guess+1)]
-β = .01
-d = length(ρ_0)
-q(ρ1,ρ2) = 1 #transition prob
-Q(ρ) = ρ+rand(Normal(0,β),d,1)
-
-mask_step = dx
-num_masks = Int(floor(minimum([L,M])/dx)-1)
-
-num_params = length(ρ_0)
-
-MEAN_matrix = zeros(num_params,num_masks)
-VAR_matrix = zeros(num_params,num_masks)
-SURF_vec = zeros(num_masks)
-a_rate_vec = zeros(num_masks)
-steps = 1000
-burnin = 100
-
-for m = 1:num_masks
-    #Random.seed!(1)
-    println("--------------------------------------------------------------------------------")
-    LL = (-mask_step*m,-mask_step*m)
-    UR = (mask_step*m,mask_step*m)
-    SURF_vec[m] = (2*mask_step*m)^2
-    (Mask,Coordset) = CreateRectangularMask2D(xas,yas,LL,UR)
-    Ynew = Mask*E_real*a_real
-    #running MH algo for given mask
-    log_posterior_MH(ρ) = log_posterior(Ynew,ρ[end],ρ[1:n_guess^2],ρ[n_guess^2+1:end-1],Mask,E_guess,n_guess,F)
-    (Path,arate) = MetropolisHastingsAlgorithm(log_posterior_MH,ρ_0,q,Q,steps,burnin,true)
-    #calculating mean and variances of parameters
-    a_rate_vec[m] = arate
-    MEAN_matrix[:,m] = mean(Path,dims = 2)
-    VAR_matrix[:,m] = var(Path,dims = 2)
-end
-    #return MEAN_matrix,VAR_matrix,SURF_vec
-#end
-Plots.plot(SURF_vec,transpose(VAR_matrix),legend = false)
-
-a_rate_vec

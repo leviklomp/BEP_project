@@ -118,10 +118,10 @@ NMy = length(maskyas)
 maskval = ones(NMy,NMx)
 Plots.heatmap!(maskxas,maskyas,maskval,color = "black")
 
-Ynew = Mask*MatrixToVector(Y)
+
 Coordset
 =#
-            
+Ynew = Mask*MatrixToVector(Y)         
 n_guess = 5
 E_guess = GridEigenFunctionMatrix2D(xas,yas,eigenf,n_guess) 
 γ_0 = ones(n_guess,n_guess)

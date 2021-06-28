@@ -111,8 +111,16 @@ VAR_MH = load("PerfCompMHexample2.jld")["VARMH"]
 STD_MH = load("PerfCompMHexample2.jld")["STDMH"]
 a_real = load("PerfCompMHexample2.jld")["real_a"]
 =#
-transpose(mean(VAR_MH,dims=1))
 
+#calculating MSE
+real_params = [a_real;MatrixToVector(γ_real);ν2_real]
+MSE_array = zeros(N_sim+1)
+for i = 1:N_sim+1
+    MSE_array[i] = (1/d)*sum((MEAN_MH[:,i] .- real_params).^2)
+end
+MSE_array
+
+##
 real_params = [a_real;MatrixToVector(γ_real);ν2_real]
 reverse(Num_Pixels_arr)
 MEAN_measure = abs.(MEAN_MH.-real_params) #deviation of estimate from real value
